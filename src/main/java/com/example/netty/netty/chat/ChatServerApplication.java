@@ -19,7 +19,6 @@ public class ChatServerApplication {
     @Autowired
     @Qualifier("bootstrap")
     private ServerBootstrap serverBootstrap;
-
     @Autowired
     ChatHandler chatHandler;
 
