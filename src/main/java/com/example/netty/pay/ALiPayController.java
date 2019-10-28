@@ -163,11 +163,6 @@ public class ALiPayController {
         }
     }
 }
-
-
-
-
-
 // 查询支付宝的支付状态
 // @RequestMapping("carts/query")
 // public ModelAndView QueryStatus( ){
