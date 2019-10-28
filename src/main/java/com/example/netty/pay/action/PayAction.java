@@ -1,5 +1,18 @@
 package com.example.netty.pay.action;
 
+import com.alipay.api.internal.util.AlipaySignature;
+import com.example.netty.pay.alipay.Configs;
+import com.example.netty.pay.weixin.EduGZHConfig;
+import com.example.netty.pay.weixin.EduWXConfig;
+import com.github.wxpay.sdk.WXPayUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,23 +20,6 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.alipay.api.internal.util.AlipaySignature;
-import com.github.wxpay.sdk.WXPayUtil;
-import com.mj.courier_station.pay.alipay.Configs;
-import com.mj.courier_station.pay.weixin.EduGZHConfig;
-import com.mj.courier_station.pay.weixin.EduWXConfig;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 支付后的回调业务控制

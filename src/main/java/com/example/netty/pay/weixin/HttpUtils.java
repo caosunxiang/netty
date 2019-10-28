@@ -1,5 +1,4 @@
 package com.example.netty.pay.weixin;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
