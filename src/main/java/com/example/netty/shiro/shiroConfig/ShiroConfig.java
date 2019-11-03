@@ -42,6 +42,7 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setUnauthorizedUrl("/");
         //src="jquery/jquery-3.2.1.min.js" 生效
         filterChainDefinitionMap.put("/jquery/*", "anon");
+        filterChainDefinitionMap.put("/js/*", "anon");
         // 设置登录的URL为匿名访问，因为一开始没有用户验证
         filterChainDefinitionMap.put("/login/login", "anon");
         filterChainDefinitionMap.put("/Exception.class", "anon");

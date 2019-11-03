@@ -6,6 +6,9 @@
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="pwd" property="pwd"/>
+		<result column="connected" property="connected"/>
+		<result column="mostsignbits" property="mostsignbits"/>
+		<result column="leastsignbits" property="leastsignbits"/>
         <association property="role" javaType="com.example.netty.pojo.Role">
             <id column="id" property="id"/>
             <result column="rname" property="rName"/>
@@ -19,6 +22,9 @@ SELECT
 	u.id,
 	u.`name`,
 	u.pwd,
+	u.connected,
+	u.mostsignbits,
+	u.leastsignbits,
 	r.rname,
 	r.rremark
 FROM
@@ -33,6 +39,9 @@ WHERE
 	u.id,
 	u.`name`,
 	u.pwd,
+	u.connected,
+	u.mostsignbits,
+	u.leastsignbits,
 	r.rname,
 	r.rremark
 FROM
@@ -41,4 +50,7 @@ FROM
 WHERE
 	u.`name` = #{name}
     </select>
+	<update id="save">
+		update  db_user set connected=#{connected},mostsignbits=#{mostsignbits},leastsignbits=#{leastsignbits} where `name`=#{name}
+	</update>
 </mapper>

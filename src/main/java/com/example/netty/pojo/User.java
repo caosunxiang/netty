@@ -15,5 +15,8 @@ public class User implements Serializable {
     private Integer id;
     private String name;
     private String pwd;
+    private short connected;
+    private Long mostsignbits;
+    private Long leastsignbits;
     private Role role;
 }

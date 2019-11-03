@@ -66,4 +66,13 @@ public class Ahandler {
     public String chat(){
         return "/chat";
     }
+
+    @RequestMapping("/private")
+    public String ccc() {
+        return "/private1";
+    }
+    @RequestMapping("/private1")
+    public String cc() {
+        return "/private";
+    }
 }

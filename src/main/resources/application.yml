@@ -27,3 +27,7 @@ spring:
     static-locations: classpath:/templates
   mapper-locations: classpath:mapper/*.xml
 
+wss :
+  server:
+     port: 8081
+     host: localhost
