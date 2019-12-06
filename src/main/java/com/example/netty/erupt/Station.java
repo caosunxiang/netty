@@ -24,19 +24,22 @@ public class Station extends Thread {
     @Override
     public void run() {
         while (tick>0){
-            synchronized (ob){//这个很重要，必须使用一个锁
-                if(tick>0){
-                    System.out.println(getName()+"这是第"+tick+"张票");
-                    tick--;
-                }else {
-                    System.out.println("已售罄");
+            for (int i=0;i<10000;i++){
+                synchronized (this){//这个很重要，必须使用一个锁
+                    if(tick>0){
+                        System.out.println(getName()+"这是第"+tick+"张票");
+                        tick--;
+                    }else {
+                        System.out.println("已售罄");
+                    }
+                }
+                try {
+                    sleep(1000);//间隔一秒
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
-            try {
-                sleep(1000);//间隔一秒
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
         }
     }
 }

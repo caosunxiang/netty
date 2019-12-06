@@ -19,4 +19,17 @@ public class User implements Serializable {
     private Long mostsignbits;
     private Long leastsignbits;
     private Role role;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", pwd='" + pwd + '\'' +
+                ", connected=" + connected +
+                ", mostsignbits=" + mostsignbits +
+                ", leastsignbits=" + leastsignbits +
+                ", role=" + role +
+                '}';
+    }
 }

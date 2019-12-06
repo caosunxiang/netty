@@ -1,5 +1,6 @@
 server:
   port: 9999
+  service-domain: http://127.0.0.1:8081
 spring:
   datasource:
     master:
@@ -31,3 +32,21 @@ wss :
   server:
      port: 8081
      host: localhost
+
+
+pay:
+  alipay:
+    gatewayUrl: 2019112369402007 #"支付宝gatewayUrl"
+    appid: 2019112369402007 #"商户应用id"
+    app-private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCdbolSk54E7ddnBb2qymZe2ZULb15D+XVBQbKC5BP20GLaAusrPa34ZIjKcVQhoNevZu0GIE8Tl172E6XEiCe/2t/wda2BPr/JiwUqpXQfot1oo1IJFRI37sLjh1qfpj2jSy8sSfMhv4FpRSubQIgxdqGPreLCPB2qDNRAcJZm/2CGCM3jmKtPamchwX9+8qsGxGocjVdzz+oxksKdjYt0lQj2eahqmlDUn0ynIFnntKIaS4IqBodnPU/QV0agu0ysRXL+TtM4CZuC25aMlG+DrJ9V5VXF6MRh6uHJIClvVLdv9syUd+rRD06a3jQNRaDd9oGV0QdbZd+r/+EcajCjAgMBAAECggEAWQUh/WGfXuYmgQjMAQFF9ahPERI+WW17khTWHhFeAJhA7UntNJxB/UzL1L1Ud1d93p7ytB4c2NUlSzw85e6fm2rmahAAti6HQC2uFDlOen0beYmwX5ZcoOgPp5zn75KPFAD1gbOnGZQyVxZX3AgXevC71oTazj4z/+4VLwL66O3ipSnmz9HYmLPxQCjRYM5jvLjSGQN6n9wLshUQSHiClBFfAIf/hbZ69uJCL7yQCb81xJnXIeCd4T/Pac7VJ87rG5Vx0La0RbjdlJdDTw/xwaGT9J3yjtkr1hxsiM3PTpZfmAXuXULShH+oR1nNWKvb9liNRShTP6OD2vCAhhlUsQKBgQD4ne4qGx+mp/sjMOcBfxLW80mZ0z5PirJcMMc+cHqLcw/ENIZhbg/BJOMvcrf1M/V1rE+o8s/jehow37WTqefGQersJA+Dx/snZijzh1y1rZwhexTtJahn+psrC0M8m+4/sNZya7XumBDTZ4lMRGcydIQnMuI00OcctdRmY1l0JQKBgQCiG2LNRmcU95emgTfhAkQhUI6l4rn8BPphvDTLB1Y1X7SxMAtmZIWVMI/vtUQgoK+F7qECSwqYlYt0wUEW9hRmRonLy071DKCbHnJWRO3i+Eqspheb8pV6SvyFrAKWVXC7X8GuWMZMI94v/fkXklBzrKiqyOm1J3uvHlEzhiPTJwKBgQCDp5Zkg8KKDXCHXTEncLR4UZNLOztHAeqbuVT5crTiPcc+npX+6Dq9jBwmlzhlR+OXMe1pSVPfYVyXPxA3pwTOzz9pV1tD7NXKMmZDOA5XQx1n+XbGcmew0Fv1OlybrvNGlQ2qv/Ey7SIT4UMquRpw9JS68U4qq+mHIZ7drYTEZQJ/ab9ztHU4yXS6eOPSj/Xqe9ERPSWqLb0RmLAtwEQI+Mh2FyBAT4tDmQ8U1kppJt+roLMKVXSedOsZDhEDZPciV5WsTkVSPIkAPDCgZaaRiH5wODAhNpoI6L4B/TE4ftk9sP3GWvWOZhz/1E7ZL4dC9DKt1Ls7ufEHvjUIw5O9ywKBgQC5N9x3k4DCk+Q0oZBToe7MAMVDt9erNl6JSzweebOpwXVIVz73M/La00FnFQcRvMbZ2KamrZLk2Jt8QWWt9nEVaOcPQx9Xh04yscDazRn6FIngz9lGMLB9Np3B9XgPCrUIYef0aH/6TSbxat/68c8azDrRSH4aYfb2eQkMqK643w== #"应用RSA私钥，用于对商户请求报文加签"
+    alipay-public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiycnuuJWMJocLfqvK3GO53Hf677rgK2gyrwVd5AnoFkN57EDAT+sPUb7yiFSznTbk6Vmz3pSob+RtYKr6dd5XxLZ2wjDwQWZsaxO1wgX1DayidvSDC7Br8gmo2uQtuX4sEwoGbu6d6LsfICL79p5uwu138qiX/4ByngDc+1ap9XJ6ALY9OJwnK7YI87AuwoiMQ9R8ohbW54/92F3MglqX7eAaBOycJpbMEvxKite1HPjEhO22pDBCxpkVbfBVP+tjt9ffrORjnoW8XsoAc91KgHfBC8GANlXdoZiEz4Hk2avglHruEljaxVsRxcdvigut4QC8PUSOUVEWbPZ3R170wIDAQAB  #"支付宝RSA公钥，用于验签支付宝应答"
+    #支付成功的异步通知回调接口
+    notify-url: ${server.service-domain}/notify
+
+
+wx:
+  app:
+    appId: wx0102469c851c004d
+    mchId: 1547005321
+    key: B4xmDu3akF0fl3svrf7qTlAkJNkPqqoZ
+    notifyUrl: https://test.shuai.com/wxPayCallback
