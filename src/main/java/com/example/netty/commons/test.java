@@ -1,4 +1,4 @@
-package com.example.netty.Commons;
+package com.example.netty.commons;
 
 import com.example.netty.pojo.User;
 import org.apache.commons.beanutils.BeanUtils;
