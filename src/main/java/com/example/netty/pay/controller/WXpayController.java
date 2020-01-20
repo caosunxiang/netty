@@ -1,193 +1,169 @@
 package com.example.netty.pay.controller;
 
 import com.example.netty.pay.commons.WXpay.*;
-import com.example.netty.pay.service.WXAppPayService;
 import com.example.netty.util.Hutool;
-import com.github.wxpay.sdk.WXPayUtil;
+import com.example.netty.util.StringUtil;
 import io.swagger.annotations.Api;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.service.spi.ServiceException;
+import io.swagger.annotations.ApiOperation;
 import org.jdom2.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-/***
- * @Author: 曹孙翔
- * @Description:微信支付
- * @Date: 13:44 2019/12/2
- * @Param:
- * @return:
- **/
-@RestController
-@Slf4j
-@Api(tags = "微信支付")
+@Api("微信支付")
+@Controller
+@CrossOrigin
+@RequestMapping("/weixin")
 public class WXpayController {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(WXpayController.class);
+	private static final Logger logger = LoggerFactory.getLogger(WXpayController.class);
+     @RequestMapping("/pay/wx")
+	 @ResponseBody
+	 public WxNotifyParam pay(HttpServletRequest request, HttpServletResponse response, String id, Double money){
+     	return initWx(request, response, id, money);
+	 }
+	/**
+	 * 初始化微信支付
+	 *
+	 * // * @param request // * @param response // * @param orderId // * @return
+	 */
+	// @RequestMapping("/pay/wx")
+	// @ResponseBody
+	public WxNotifyParam initWx(HttpServletRequest request, HttpServletResponse response, String id, Double money) {
+		// Map<String, Object> map = new HashMap<String, Object>();
+		// 获取生成预支付订单的请求类
+		PrepayIdRequestHandler prepayReqHandler = new PrepayIdRequestHandler(request, response);
+//		Integer sum = Integer.parseInt(orders.getTotalMoney()) - Integer.parseInt(orders.getCouponMoney());
+		new DecimalFormat("#.00").format(money);
+		String totalFee = String.valueOf((int) (money * 100));// 微信支付是
+		// 分--* 100
+		// 上线后，将此代码放开
+		prepayReqHandler.setParameter("appid", ConstantUtil.APP_ID);
+		prepayReqHandler.setParameter("body", ConstantUtil.BODY);
+		prepayReqHandler.setParameter("mch_id", ConstantUtil.MCH_ID);
+		String nonce_str = WXUtil.getNonceStr();
+		prepayReqHandler.setParameter("nonce_str", nonce_str);
+		prepayReqHandler.setParameter("notify_url", ConstantUtil.NOTIFY_URL);
+		String out_trade_no = Hutool.getOrderIdByTime();
+		prepayReqHandler.setParameter("out_trade_no", out_trade_no);
+		prepayReqHandler.setParameter("spbill_create_ip", "192.168.0.88");
+		String timestamp = WXUtil.getTimeStamp();
+		prepayReqHandler.setParameter("time_start", timestamp);
+		prepayReqHandler.setParameter("total_fee", totalFee);
+		prepayReqHandler.setParameter("trade_type", "APP");
+		prepayReqHandler.setParameter("attach", id);
+		/**
+		 * 注意签名（sign）的生成方式，具体见官方文档（传参都要参与生成签名，且参数名按照字典序排序，最后接上APP_KEY,转化成大写）
+		 */
+		prepayReqHandler.setParameter("sign", prepayReqHandler.createMD5Sign());
+		prepayReqHandler.setGateUrl(ConstantUtil.GATEURL);
+		String prepayid;
+		WxNotifyParam param = new WxNotifyParam();
+		Map<Object, Object> map = new HashMap<>();
+		try {
+			prepayid = prepayReqHandler.sendPrepay();
+			// 若获取prepayid成功，将相关信息返回客户端
+			if (prepayid != null && !prepayid.equals("")) {
+				String signs = "appid=" + ConstantUtil.APP_ID + "&noncestr=" + nonce_str
+						+ "&package=Sign=WXPay&partnerid=" + ConstantUtil.PARTNER_ID + "&prepayid=" + prepayid
+						+ "&timestamp=" + timestamp + "&key=" + ConstantUtil.APP_KEY;
+				/**
+				 * 签名方式与上面类似
+				 */
+				param.setPrepayId(prepayid);
+				param.setSign(Md5Util.MD5Encode(signs, "utf8").toUpperCase());
+				param.setAppId(ConstantUtil.APP_ID);
+				// 等于请求prepayId时的time_start
+				param.setTimeStamp(timestamp);
+				// 与请求prepayId时值一致
+				param.setNonceStr(nonce_str);
+				// 固定常量
+				param.setPackages("Sign=WXPay");
+				param.setPartnerId(ConstantUtil.PARTNER_ID);
 
-    @Autowired
-    private WXAppPayService wxAppPayService;
+//				map.put("appid", ConstantUtil.APP_ID);
+//				map.put("noncestr", nonce_str);
+//				map.put("package", "Sign=WXPay");
+//				map.put("partnerid", ConstantUtil.PARTNER_ID);
+//				map.put("prepayid", prepayid);
+//				map.put("timestamp", timestamp);
+//				map.put("sign", Md5Util.MD5Encode(signs, "utf8").toUpperCase());
+				logger.info("-----------》创建微信支付成功: " + param);
+				logger.info("-----------》获取微信订单Id成功: " + out_trade_no);
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+		return param;
+	}
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(20);
+	/**
+	 * 接收微信支付回调通知
+	 *
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
 
-
-    /***
-     * @Author: 曹孙翔
-     * @Description:支付接口
-     * @Date: 18:50 2019/12/5
-     * @Param: [request, orderId, money]
-     * @return: java.lang.String
-     **/
-    @RequestMapping("/WXpay")
-    public String pay(HttpServletRequest request, String orderId, Integer money) {
-        return wxAppPayService.pay(money, orderId, request);
-    }
-
-    /***
-     * @Author: 曹孙翔
-     * @Description:支付回调
-     * @Date: 15:09 2019/12/2
-     * @Param: [request, response, orderId, money]
-     * @return: java.lang.String
-     **/
-    @RequestMapping("/wxPayCallback")
-    public String initWx(HttpServletRequest request) {
-        try {
-            log.info("微信支付回调");
-            //读取参数
-            //解析xml成map
-            Map<String, String> map = WXPayUtil.xmlToMap(getParam(request));
-            log.info("微信支付回调返回消息{}", map);
-            check(map);//该处读者自行校验（验证订单号，付款金额等是否正确）
-            String orderNo = map.get("out_trade_no");
-            String resultCode = map.get("result_code");
-            //另起线程处理业务
-            log.info("另起线程处理业务");
-            executorService.execute(() -> {
-                //支付成功
-                if (resultCode.equals("SUCCESS")) {
-                    log.info("支付成功");
-                    // TODO 自己的业务逻辑
-                } else {
-                    log.info("支付失败");
-                    // TODO 自己的业务逻辑
-                }
-            });
-            if (resultCode.equals("SUCCESS")) {
-                return XMLUtil.setXML("SUCCESS", "OK");
-            } else {
-                return XMLUtil.setXML("fail", "付款失败");
-            }
-        } catch (ServiceException e) {
-            log.info("微信支付回调发生异常{}", e.getMessage());
-            return XMLUtil.setXML("fail", "付款失败");
-        } catch (Exception e) {
-            log.info("微信支付回调发生异常{}", e.getLocalizedMessage());
-            return XMLUtil.setXML("fail", "付款失败");
-        }
-    }
+	@RequestMapping("/wx/notify_url")
+	public String notifyWeiXinPay(HttpServletRequest request, HttpServletResponse response) throws IOException, JDOMException {
+		System.out.println("微信支付回调");
+		InputStream inStream = request.getInputStream();
+		ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int len = 0;
+		while ((len = inStream.read(buffer)) != -1) {
+			outSteam.write(buffer, 0, len);
+		}
+		String resultxml = new String(outSteam.toByteArray(), "utf-8");
+		Map<String, String> params = XMLUtil.doXMLParse(resultxml);
+		outSteam.close();
+		inStream.close();
 
 
-    /**
-     * 接收微信支付回调通知
-     *
-     * @param request
-     * @param response
-     * @throws Exception
-     */
+		Map<String, String> return_data = new HashMap<String, String>();
+		if (!params.get("return_code").equals("SUCCESS")) {
+			// 支付失败
+			return_data.put("return_code", "FAIL");
+			return_data.put("return_msg", "return_code不正确");
+			return StringUtil.GetMapToXML(return_data);
+		} else {
+			System.out.println("===============付款成功==============");
+			// ------------------------------
+			// 处理业务开始
+			// ------------------------------
+			// 此处处理订单状态，结合自己的订单数据完成订单状态的更新
+			// ------------------------------
 
-    @RequestMapping("/wx/notify_url")
-    public String getTenPayNotif(HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
-        logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>进入微信回调方法");
-        PrintWriter writer = response.getWriter();
-        InputStream inStream = request.getInputStream();
-        ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = 0;
-        while ((len = inStream.read(buffer)) != -1) {
-            outSteam.write(buffer, 0, len);
-        }
-        outSteam.close();
-        inStream.close();
-        String result = new String(outSteam.toByteArray(), "utf-8");
-        logger.info("微信回调支付通知结果：" + result);
-        Map<String, String> map = null;
-        try {
-            /**
-             * 解析微信通知返回的信息
-             */
-            map = XMLUtil.doXMLParse(result);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        logger.info("- - - - - - - - -");
-        logger.info("= = = = = = = = =:" + map);
-        // 若支付成功，则告知微信服务器收到通知
-        if (map.get("return_code").equals("SUCCESS")) {
-            if (map.get("result_code").equals("SUCCESS")) {
-                logger.info("微信充值成功！");
 
-                if (1 == 1) {
+				if (true){
 
-                    return "SUCCESS";
-                }
-
-            } else {
-
-                logger.error("微信支付回调失败");
-                return "fail";
-            }
-            return "fail";
-        }
-        return "fail";
-    }
-
-    public static void main(String args[]) {
-        String notifyStr = XMLUtil.setXML("SUCCESS", "OK");
-        System.out.println(notifyStr);
-    }
-
-    public String getParam(HttpServletRequest request) throws IOException {
-        //读取参数
-        InputStream inputStream;
-        StringBuilder sb = new StringBuilder();
-        inputStream = request.getInputStream();
-        String s;
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-        while ((s = in.readLine()) != null) {
-            sb.append(s);
-        }
-        in.close();
-        inputStream.close();
-        return sb.toString();
-    }
-
-    private void check(Map<String, String> params) throws ServiceException {
-        String outTradeNo = params.get("out_trade_no");
-        // 1、商户需要验证该通知数据中的out_trade_no是否为商户系统中创建的订单号，
-        //OrderInfo order = orderService.selectOrderByOrderNo(outTradeNo);
-        //if (order == null) {
-        //    throw new ServiceException("out_trade_no错误");
-        //}
-        //
-        // 2、判断total_amount是否确实为该订单的实际金额（即商户订单创建时的金额），
-        //Integer totalAmount = Integer.valueOf(params.get("total_fee"));
-        //log.info("totalAmount{}", totalAmount);
-        //if (!totalAmount.equals(order.getSnapshotTotalFee())) {
-        //    throw new ServiceException("total_amount错误");
-        //}
-    }
+				return_data.put("return_code", "SUCCESS");
+				return_data.put("return_msg", "OK");
+				return StringUtil.GetMapToXML(return_data);
+			}
+			return_data.put("return_code", "fail");
+			return_data.put("return_msg", "fail");
+			return StringUtil.GetMapToXML(return_data);
+		}
+	}
+	public static void main(String args[]) {
+		String notifyStr = XMLUtil.setXML("SUCCESS", "");
+		System.out.println(notifyStr);
+	}
 }

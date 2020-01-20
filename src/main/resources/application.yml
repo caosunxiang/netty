@@ -46,7 +46,7 @@ pay:
 
 wx:
   app:
-    appId: wx0102469c851c004d
-    mchId: 1547005321
-    key: B4xmDu3akF0fl3svrf7qTlAkJNkPqqoZ
+    appId: wxe9cf32a7d2403286
+    mchId: 1573486751
+    key: 816fjyibangbang816fjyibangbang88
     notifyUrl: https://test.shuai.com/wxPayCallback

@@ -43,6 +43,7 @@ public class ShiroConfig {
         //src="jquery/jquery-3.2.1.min.js" 生效
         filterChainDefinitionMap.put("/jquery/*", "anon");
         filterChainDefinitionMap.put("/js/*", "anon");
+        filterChainDefinitionMap.put("js/*", "anon");
         filterChainDefinitionMap.put("/payAlis", "anon");
         filterChainDefinitionMap.put("/WXpay", "anon");
         // 设置登录的URL为匿名访问，因为一开始没有用户验证
